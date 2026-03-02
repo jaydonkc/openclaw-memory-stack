@@ -32,6 +32,6 @@ fi
 
 echo "[6/6] checking python scripts"
 source .venv/bin/activate
-python -m py_compile scripts/index_shared_memory.py scripts/query_memory.py scripts/build_coding_context.py scripts/build_main_context.py
+python -m py_compile scripts/index_shared_memory.py scripts/query_memory.py scripts/build_coding_context.py scripts/build_main_context.py scripts/benchmark.py scripts/migrate_embeddings.py
 
 echo "doctor: OK (warnings possible above)"

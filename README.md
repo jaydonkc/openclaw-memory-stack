@@ -150,11 +150,41 @@ Default target:
 - Changing embedding model dimensions requires reindexing Milvus collections.
 - Multi-user authz policy is out of scope; deploy behind your own trust boundaries.
 
+## Benchmarking
+
+Run latency + retrieval-quality evaluation:
+
+```bash
+scripts/run-python.sh scripts/benchmark.py \
+  --dataset bench/queries.sample.jsonl \
+  --k 5 \
+  --out bench/results/latest.json
+```
+
+Metrics produced:
+- Recall@k
+- MRR
+- Query latency (mean/p50/p95)
+
+## Safer embedding migrations
+
+When switching embedding providers/models (especially dimension changes), use:
+
+```bash
+scripts/run-python.sh scripts/migrate_embeddings.py --yes
+```
+
+What it does:
+- probes target embedding dimension from current `.env`
+- compares against current Milvus collection + saved embedding fingerprint
+- recreates collection when needed
+- reindexes scopes (`shared,main,coding` by default)
+
 ## Roadmap
 
-- Benchmark suite (latency + retrieval quality)
+- Publish benchmark baselines for common local models
 - Optional native OpenClaw memory plugin adapter
-- Safer migration tooling for embedding model switches
+- Add zero-downtime migration mode (shadow collection + swap)
 
 ## License
 
