@@ -1,30 +1,17 @@
 # OpenClaw Memory Stack
 
-A practical, local-first memory layer for OpenClaw agents.
-
-This repo helps you:
-- keep Markdown files as source of truth (`MEMORY.md`, `memory/*.md`)
-- index and retrieve semantic memory in Milvus with namespace isolation (`main`, `coding`, `shared`)
-- share one local embedding endpoint across OpenClaw built-in `memory_search` and external retrieval scripts
-
-Better long-term recall without giving up control of your data.
+A practical, long-term memory layer for OpenClaw agents.
 
 ## Why this over out-of-the-box OpenClaw memory?
 
-OpenClaw built-in memory is excellent for simple setups. This stack is better when you need:
-- strict namespace isolation (`main` vs `coding` vs `shared`)
-- a separate external vector layer you can inspect, back up, and tune (Milvus)
-- custom retrieval/context-building pipelines per agent
-- embedding backend portability (`sentence-transformers` or OpenAI-compatible local endpoints)
+OpenClaw built-in memory is excellent for simple setups. This stack is better when you want to:
+- keep Markdown files as source of truth (`MEMORY.md`, `memory/*.md`)
+- index and retrieve semantic memory in Milvus with namespace isolation (`main`, `coding`, `shared`)
+- preserving high-signal memory with customizable summarization loops
+- reduce context drift via repeatable retrieval pipelines per agent
+- keep cross-session continuity explicit in versionable files + vector index
 
-In short: built-in memory is simpler; this stack is more customizable for power users.
-
-Over multiple sessions and longer time windows, this stack helps by:
-- preserving high-signal memory with daily + weekly summarization loops
-- reducing context drift via repeatable retrieval pipelines per agent
-- keeping cross-session continuity explicit in versionable files + vector index
-
-## 5-command quickstart (OpenClaw + local embeddings)
+## Quickstart (OpenClaw + local embeddings)
 
 ```bash
 cd /path/to/openclaw-memory-stack
