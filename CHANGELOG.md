@@ -1,0 +1,12 @@
+# Changelog
+
+## Unreleased
+
+### Added
+- OpenClaw plug-and-play script: `scripts/configure_openclaw_memory.sh`
+- Python wrapper helper: `scripts/run-python.sh`
+- OpenAI-compatible embedding backend option for index/query scripts
+- 5-command quickstart and improved README intro
+
+### Changed
+- README positioning and setup flow for broader public usage

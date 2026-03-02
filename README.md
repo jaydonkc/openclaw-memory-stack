@@ -27,30 +27,21 @@ scripts/run-python.sh scripts/query_memory.py --scope coding --q "test query"
 openclaw memory status --deep --index --agent main
 ```
 
-Core design principles:
+## Use cases
 
-- selective sharing (`SHARED_MEMORY.md`) stays source-of-truth
-- Milvus provides namespace-aware vector retrieval
-- OpenMem (episodic layer) can write higher-level events on top
+- Personal memory for one OpenClaw agent
+- Split memory for multiple agents (`main`, `coding`, `shared`)
+- Local-first retrieval with optional Ollama embeddings
 
-## Files
+## Who this is for
 
-- `docker-compose.milvus.yml` — local Milvus standalone stack
-- `.env.example` — env vars for ingestion/query scripts
-- `scripts/index_shared_memory.py` — chunks and indexes shared + local memory files
-- `scripts/query_memory.py` — namespace-filtered query helper
+- Self-hosters who want local control and inspectable scripts
+- OpenClaw users who want external vector retrieval today
 
-Embedding backends supported by scripts:
-- `sentence-transformers` (default local Python model)
-- `openai` (OpenAI-compatible embeddings API; useful for local Ollama at `http://127.0.0.1:11434/v1`)
+## Who this is not for
 
-## Namespace rules
-
-Use explicit prefixes in metadata and IDs:
-
-- `main:*` — assistant/personal context
-- `coding:*` — code/system context
-- `shared:*` — cross-agent safe context
+- Teams needing managed SaaS memory out of the box
+- Users who want zero-infra setup with no Docker/Python
 
 ## Architecture (high level)
 
@@ -84,21 +75,7 @@ Use explicit prefixes in metadata and IDs:
       Main agent prompt context            Coding agent prompt context
 ```
 
-## Agent context pipeline (implemented)
-
-### Coding Agent (deep reconstruction)
-1. Core memory (`workspace-coding/MEMORY.md` + latest daily memory note)
-2. `SHARED_MEMORY.md`
-3. Milvus semantic retrieval (`query_memory.py --scope coding --q <query> --k 5`)
-4. Episodic recent events (`episodic/coding.jsonl`)
-5. Build context block with `scripts/build_coding_context.py --q "<task>"`
-
-### Main Agent (shallow reconstruction)
-1. Core memory (`workspace/MEMORY.md` + latest daily memory note)
-2. `SHARED_MEMORY.md`
-3. Build summary block with `scripts/build_main_context.py`
-
-## Quick start
+## Setup
 
 1. Bootstrap environment:
 
@@ -134,75 +111,51 @@ scripts/run-python.sh scripts/index_shared_memory.py --scope coding
 scripts/run-python.sh scripts/query_memory.py --scope coding --q "deep linking architecture decision"
 ```
 
-6. Build agent context blocks:
+7. Build agent context blocks:
 
 ```bash
-python3 scripts/build_coding_context.py --q "review PR #48 conflicts"
-python3 scripts/build_main_context.py
+scripts/run-python.sh scripts/build_coding_context.py --q "review PR #48 conflicts"
+scripts/run-python.sh scripts/build_main_context.py
 ```
 
-7. Weekly rollup (uses OpenClaw model, no Ollama required):
+8. Weekly rollup (uses OpenClaw model, no Ollama required):
 
 ```bash
 bash scripts/weekly_rollup.sh
 ```
 
-Optional cron (Sundays 02:00):
+## Embedding backends
+
+Supported in scripts:
+- `sentence-transformers` (default local Python model)
+- `openai` (OpenAI-compatible embeddings API; useful for local Ollama at `http://127.0.0.1:11434/v1`)
+
+## Plug into OpenClaw built-in memory search
+
+Use the helper script:
 
 ```bash
-0 2 * * 0 $HOME/openclaw/memory-stack/scripts/weekly_rollup.sh >> /tmp/openclaw_rollup.log 2>&1
-```
-
-## Plug into OpenClaw (shared local embedding model)
-
-If you want both OpenClaw built-in `memory_search` and this external stack to use the same local embedding endpoint (recommended):
-
-1. Start your local embedding server (example: Ollama):
-
-```bash
-ollama serve
-ollama pull nomic-embed-text
-```
-
-2. Configure OpenClaw built-in memory search:
-
-```bash
-cd /path/to/memory-stack
 bash scripts/configure_openclaw_memory.sh
 openclaw gateway restart
 openclaw memory status --deep --index --agent main
 ```
 
-3. Configure this stack to use the same endpoint in `.env`:
+Default target:
+- model: `nomic-embed-text`
+- endpoint: `http://127.0.0.1:11434/v1`
 
-```bash
-EMBED_PROVIDER=openai
-EMBED_MODEL=nomic-embed-text
-EMBED_BASE_URL=http://127.0.0.1:11434/v1
-EMBED_API_KEY=ollama
-```
+## Limitations
 
-This keeps one embedding model path for both systems.
+- This is an external memory layer; it does not replace OpenClaw’s memory plugin directly.
+- Changing embedding model dimensions requires reindexing Milvus collections.
+- Multi-user authz policy is out of scope; deploy behind your own trust boundaries.
 
-## OpenMem episodic layer (implemented scaffold)
+## Roadmap
 
-Included scripts:
-
-- `scripts/episodic_write.py` — writes namespace-tagged episodic events with secret redaction.
-- `scripts/episodic_query.py` — reads episodic events with strict namespace filtering.
-
-Example:
-
-```bash
-python scripts/episodic_write.py --namespace coding --title "Deep link decision" --event "Use canonical /l/:id route" --tags deep-linking,architecture
-python scripts/episodic_query.py --namespace coding --limit 5
-```
+- Benchmark suite (latency + retrieval quality)
+- Optional native OpenClaw memory plugin adapter
+- Safer migration tooling for embedding model switches
 
 ## License
 
 MIT (see `LICENSE`).
-
-## Important integration note
-
-This stack is production-usable as an **external memory layer** today.
-To replace OpenClaw's built-in `memory_search` implementation directly with Milvus/OpenMem, you'd need a custom OpenClaw memory plugin/adapter (not just config toggles).
