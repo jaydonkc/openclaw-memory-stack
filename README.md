@@ -7,7 +7,7 @@ This repo helps you:
 - index and retrieve semantic memory in Milvus with namespace isolation (`main`, `coding`, `shared`)
 - share one local embedding endpoint across OpenClaw built-in `memory_search` and external retrieval scripts
 
-If you want better long-term recall without giving up control of your data, this is for you.
+Better long-term recall without giving up control of your data.
 
 ## 5-command quickstart (OpenClaw + local embeddings)
 
