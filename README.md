@@ -11,11 +11,20 @@ OpenClaw built-in memory is excellent for simple setups. This stack is better wh
 - reduce context drift via repeatable retrieval pipelines per agent
 - keep cross-session continuity explicit in versionable files + vector index
 
+## Prerequisites
+
+Install these first:
+- Python 3.10+ (with `venv`)
+- Docker Engine + Docker Compose plugin
+- Ollama (default embedding runtime)
+- OpenClaw CLI
+
 ## Quickstart (OpenClaw + local embeddings)
 
 ```bash
 cd /path/to/openclaw-memory-stack
 bash scripts/setup.sh
+cp .env.example .env
 ollama pull nomic-embed-text
 docker compose -f docker-compose.milvus.yml up -d
 bash scripts/configure_openclaw_memory.sh
