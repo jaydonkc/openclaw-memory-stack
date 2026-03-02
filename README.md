@@ -24,13 +24,6 @@ This folder bootstraps the next phase of your memory architecture:
 - Milvus provides namespace-aware vector retrieval
 - OpenMem (episodic layer) can write higher-level events on top
 
-## Status
-
-- ✅ Phase 1 (Markdown-first + selective sharing): active
-- ✅ Phase 2 (Milvus semantic indexing/query): active
-- ✅ Phase 3 (episodic scripts + weekly rollup pipeline): active (script-level)
-- 🚧 Native OpenClaw memory plugin replacement (`plugins.slots.memory = custom`) is not enabled yet
-
 ## Files
 
 - `docker-compose.milvus.yml` — local Milvus standalone stack
