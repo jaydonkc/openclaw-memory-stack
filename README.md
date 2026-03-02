@@ -1,4 +1,13 @@
-# Milvus + OpenMem Integration Scaffold
+# OpenClaw Memory Stack
+
+A practical, local-first memory layer for OpenClaw agents.
+
+This repo helps you:
+- keep Markdown files as source of truth (`MEMORY.md`, `memory/*.md`)
+- index and retrieve semantic memory in Milvus with namespace isolation (`main`, `coding`, `shared`)
+- share one local embedding endpoint across OpenClaw built-in `memory_search` and external retrieval scripts
+
+If you want better long-term recall without giving up control of your data, this is for you.
 
 ## 5-command quickstart (OpenClaw + local embeddings)
 
@@ -18,7 +27,7 @@ scripts/run-python.sh scripts/query_memory.py --scope coding --q "test query"
 openclaw memory status --deep --index --agent main
 ```
 
-This folder bootstraps the next phase of your memory architecture:
+Core design principles:
 
 - selective sharing (`SHARED_MEMORY.md`) stays source-of-truth
 - Milvus provides namespace-aware vector retrieval
