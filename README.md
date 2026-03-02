@@ -85,7 +85,7 @@ openclaw memory status --deep --index --agent main
 bash scripts/setup.sh
 ```
 
-2. Edit `.env` paths for your machine.
+2. Copy and edit `.env` for your machine (`cp .env.example .env`).
 
 3. Start Milvus:
 
@@ -141,11 +141,30 @@ Default cron cadence (UTC) is set in `.env`:
 - `ROLLUP_DAILY_CRON=0 2 * * *`
 - `ROLLUP_WEEKLY_CRON=0 3 * * 0`
 
-## Embedding backends
+## Configuration
 
-Supported in scripts:
-- `sentence-transformers` (default local Python model)
-- `openai` (OpenAI-compatible embeddings API; useful for local Ollama at `http://127.0.0.1:11434/v1`)
+Copy `.env.example` to `.env` and set values.
+
+### Embeddings (important)
+
+**Default configuration (recommended):** local Ollama + `nomic-embed-text`
+
+```env
+EMBED_PROVIDER=openai
+EMBED_MODEL=nomic-embed-text
+EMBED_BASE_URL=http://127.0.0.1:11434/v1
+EMBED_API_KEY=ollama
+```
+
+Supported backends:
+- `openai` (OpenAI-compatible embeddings API; default path for Ollama/vLLM/proxies)
+- `sentence-transformers` (local Python model runtime)
+
+If you switch provider/model, run migration + reindex:
+
+```bash
+scripts/run-python.sh scripts/migrate_embeddings.py --yes
+```
 
 ## Plug into OpenClaw built-in memory search
 
