@@ -9,6 +9,16 @@ This repo helps you:
 
 Better long-term recall without giving up control of your data.
 
+## Why this over out-of-the-box OpenClaw memory?
+
+OpenClaw built-in memory is excellent for simple setups. This stack is better when you need:
+- strict namespace isolation (`main` vs `coding` vs `shared`)
+- a separate external vector layer you can inspect, back up, and tune (Milvus)
+- custom retrieval/context-building pipelines per agent
+- embedding backend portability (`sentence-transformers` or OpenAI-compatible local endpoints)
+
+In short: built-in memory is simpler; this stack is more customizable for power users.
+
 ## 5-command quickstart (OpenClaw + local embeddings)
 
 ```bash
@@ -118,10 +128,24 @@ scripts/run-python.sh scripts/build_coding_context.py --q "review PR #48 conflic
 scripts/run-python.sh scripts/build_main_context.py
 ```
 
-8. Weekly rollup (uses OpenClaw model, no Ollama required):
+8. Rollups (uses OpenClaw model, no Ollama required):
 
 ```bash
+# Daily: 3 durable facts
+bash scripts/daily_rollup.sh
+
+# Weekly: synthesize week-level patterns
 bash scripts/weekly_rollup.sh
+```
+
+Recommended schedule:
+
+```cron
+# Daily at 02:00 UTC
+0 2 * * * /path/to/openclaw-memory-stack/scripts/daily_rollup.sh >> /tmp/openclaw_daily_rollup.log 2>&1
+
+# Weekly synthesis on Sunday at 03:00 UTC
+0 3 * * 0 /path/to/openclaw-memory-stack/scripts/weekly_rollup.sh >> /tmp/openclaw_weekly_rollup.log 2>&1
 ```
 
 ## Embedding backends

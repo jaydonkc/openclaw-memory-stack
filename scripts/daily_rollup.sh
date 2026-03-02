@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DAYS="${DAYS:-7}"
+DAYS="${DAYS:-1}"
 BASE_DIR="${BASE_DIR:-$HOME/.openclaw}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 STACK_DIR="${STACK_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)}"
-LOG_LIMIT_CHARS="${LOG_LIMIT_CHARS:-7000}"
+LOG_LIMIT_CHARS="${LOG_LIMIT_CHARS:-5000}"
 
 summarize_with_openclaw() {
   local agent_id="$1"
   local logs="$2"
   local prompt
-  prompt=$'Synthesize this week into exactly 3 durable, actionable facts.\nPrefer stable patterns over one-off noise and include one next-step when possible.\nFormat exactly as:\n- Fact 1\n- Fact 2\n- Fact 3\n\nLogs:\n'
+  prompt=$'Extract exactly 3 durable, actionable facts from these logs.\nPrioritize decisions, blockers, and next actions.\nFormat exactly as:\n- Fact 1\n- Fact 2\n- Fact 3\n\nLogs:\n'
   prompt+="$logs"
 
   local json
   if ! json=$(openclaw agent --agent "$agent_id" --message "$prompt" --json 2>/dev/null); then
-    echo "- Weekly summary unavailable (openclaw agent command failed)."
+    echo "- Daily summary unavailable (openclaw agent command failed)."
     return 0
   fi
 
@@ -28,9 +28,9 @@ try:
     text=''
     if payloads:
         text=payloads[0].get('text','')
-    print(text.strip() or '- Weekly summary unavailable (empty response).')
+    print(text.strip() or '- Daily summary unavailable (empty response).')
 except Exception:
-    print('- Weekly summary unavailable (parse error).')
+    print('- Daily summary unavailable (parse error).')
 PY
 }
 
@@ -51,21 +51,20 @@ for AGENT in main coding; do
   fi
 
   if [[ -z "${LOGS:-}" ]]; then
-    SUMMARY='- No recent logs to summarize this week.'
+    SUMMARY='- No recent logs to summarize today.'
   else
     SUMMARY=$(summarize_with_openclaw "$AGENT" "$LOGS")
   fi
 
   {
-    echo "## $(date -u +%F) Weekly"
+    echo "## $(date -u +%F) Daily"
     echo "$SUMMARY"
     echo
   } >> "$MEM_FILE"
-
 done
 
 if [[ -x "$STACK_DIR/scripts/sync_all.sh" ]]; then
   "$STACK_DIR/scripts/sync_all.sh" || true
 fi
 
-echo "weekly rollup complete"
+echo "daily rollup complete"
