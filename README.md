@@ -27,15 +27,6 @@ Install these first:
 - Ollama (default embedding runtime)
 - OpenClaw CLI
 
-## 10-minute trial (no deep OpenClaw changes)
-
-```bash
-cd /path/to/openclaw-memory-stack
-bash scripts/try_local.sh
-```
-
-This runs a smoke-test flow (setup, model pull, Milvus up, doctor, index, query).
-
 ## Quickstart (OpenClaw + local embeddings)
 
 ```bash

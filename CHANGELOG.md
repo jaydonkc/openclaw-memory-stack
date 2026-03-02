@@ -11,7 +11,6 @@
 - Safer embedding migration script (`scripts/migrate_embeddings.py`)
 - Daily rollup script (`scripts/daily_rollup.sh`) for 3-fact daily summaries
 - Env-driven cron installer (`scripts/install_cron.sh`) for rollup cadence
-- One-command local trial script (`scripts/try_local.sh`)
 
 ### Changed
 - README positioning and setup flow for broader public usage
