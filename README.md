@@ -7,9 +7,17 @@ A practical, long-term memory layer for OpenClaw agents.
 OpenClaw built-in memory is excellent for simple setups. This stack is better when you want to:
 - keep Markdown files as source of truth (`MEMORY.md`, `memory/*.md`)
 - index and retrieve semantic memory in Milvus with namespace isolation (`main`, `coding`, `shared`)
-- preserving high-signal memory with customizable summarization loops
+- preserve high-signal memory with customizable summarization loops
 - reduce context drift via repeatable retrieval pipelines per agent
 - keep cross-session continuity explicit in versionable files + vector index
+
+## Why this over cloud-based memory?
+
+- **Data control:** memory lives on your machine and infrastructure
+- **Privacy:** no forced third-party memory SaaS sync
+- **Auditability:** Markdown + Git history makes changes inspectable
+- **No vendor lock-in:** switch embedding/runtime providers without rewriting your whole stack
+- **Predictable cost:** local-first retrieval avoids recurring cloud memory bills
 
 ## Prerequisites
 
@@ -18,6 +26,15 @@ Install these first:
 - Docker Engine + Docker Compose plugin
 - Ollama (default embedding runtime)
 - OpenClaw CLI
+
+## 10-minute trial (no deep OpenClaw changes)
+
+```bash
+cd /path/to/openclaw-memory-stack
+bash scripts/try_local.sh
+```
+
+This runs a smoke-test flow (setup, model pull, Milvus up, doctor, index, query).
 
 ## Quickstart (OpenClaw + local embeddings)
 
