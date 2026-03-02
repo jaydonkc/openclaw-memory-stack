@@ -180,12 +180,6 @@ What it does:
 - recreates collection when needed
 - reindexes scopes (`shared,main,coding` by default)
 
-## Roadmap
-
-- Publish benchmark baselines for common local models
-- Optional native OpenClaw memory plugin adapter
-- Add zero-downtime migration mode (shadow collection + swap)
-
 ## License
 
 MIT (see `LICENSE`).
