@@ -1,5 +1,23 @@
 # Milvus + OpenMem Integration Scaffold
 
+## 5-command quickstart (OpenClaw + local embeddings)
+
+```bash
+cd /path/to/openclaw-memory-stack
+bash scripts/setup.sh
+docker compose -f docker-compose.milvus.yml up -d
+bash scripts/configure_openclaw_memory.sh
+bash scripts/doctor.sh
+```
+
+Then verify retrieval:
+
+```bash
+scripts/run-python.sh scripts/index_shared_memory.py --scope coding
+scripts/run-python.sh scripts/query_memory.py --scope coding --q "test query"
+openclaw memory status --deep --index --agent main
+```
+
 This folder bootstraps the next phase of your memory architecture:
 
 - selective sharing (`SHARED_MEMORY.md`) stays source-of-truth
