@@ -16,9 +16,16 @@ OpenClaw built-in memory is excellent for simple setups. This stack is better wh
 ```bash
 cd /path/to/openclaw-memory-stack
 bash scripts/setup.sh
+ollama pull nomic-embed-text
 docker compose -f docker-compose.milvus.yml up -d
 bash scripts/configure_openclaw_memory.sh
 bash scripts/doctor.sh
+```
+
+If Ollama is not already running as a service, start it in another terminal:
+
+```bash
+ollama serve
 ```
 
 Then verify retrieval:
