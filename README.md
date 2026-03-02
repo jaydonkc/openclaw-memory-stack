@@ -20,6 +20,10 @@ This folder bootstraps the next phase of your memory architecture:
 - `scripts/index_shared_memory.py` — chunks and indexes shared + local memory files
 - `scripts/query_memory.py` — namespace-filtered query helper
 
+Embedding backends supported by scripts:
+- `sentence-transformers` (default local Python model)
+- `openai` (OpenAI-compatible embeddings API; useful for local Ollama at `http://127.0.0.1:11434/v1`)
+
 ## Namespace rules
 
 Use explicit prefixes in metadata and IDs:
@@ -99,15 +103,15 @@ bash scripts/doctor.sh
 5. Index memories:
 
 ```bash
-python3 scripts/index_shared_memory.py --scope shared
-python3 scripts/index_shared_memory.py --scope main
-python3 scripts/index_shared_memory.py --scope coding
+scripts/run-python.sh scripts/index_shared_memory.py --scope shared
+scripts/run-python.sh scripts/index_shared_memory.py --scope main
+scripts/run-python.sh scripts/index_shared_memory.py --scope coding
 ```
 
-5. Query (example):
+6. Query (example):
 
 ```bash
-python3 scripts/query_memory.py --scope coding --q "deep linking architecture decision"
+scripts/run-python.sh scripts/query_memory.py --scope coding --q "deep linking architecture decision"
 ```
 
 6. Build agent context blocks:
@@ -128,6 +132,37 @@ Optional cron (Sundays 02:00):
 ```bash
 0 2 * * 0 $HOME/openclaw/memory-stack/scripts/weekly_rollup.sh >> /tmp/openclaw_rollup.log 2>&1
 ```
+
+## Plug into OpenClaw (shared local embedding model)
+
+If you want both OpenClaw built-in `memory_search` and this external stack to use the same local embedding endpoint (recommended):
+
+1. Start your local embedding server (example: Ollama):
+
+```bash
+ollama serve
+ollama pull nomic-embed-text
+```
+
+2. Configure OpenClaw built-in memory search:
+
+```bash
+cd /path/to/memory-stack
+bash scripts/configure_openclaw_memory.sh
+openclaw gateway restart
+openclaw memory status --deep --index --agent main
+```
+
+3. Configure this stack to use the same endpoint in `.env`:
+
+```bash
+EMBED_PROVIDER=openai
+EMBED_MODEL=nomic-embed-text
+EMBED_BASE_URL=http://127.0.0.1:11434/v1
+EMBED_API_KEY=ollama
+```
+
+This keeps one embedding model path for both systems.
 
 ## OpenMem episodic layer (implemented scaffold)
 

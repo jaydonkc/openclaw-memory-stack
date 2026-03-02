@@ -8,6 +8,9 @@ from typing import List, Tuple
 from dotenv import load_dotenv
 from pymilvus import MilvusClient, DataType
 from sentence_transformers import SentenceTransformer
+import json
+import urllib.request
+
 
 
 def chunk_text(text: str, size: int = 900, overlap: int = 120) -> List[str]:
@@ -53,6 +56,32 @@ def ensure_collection(client: MilvusClient, name: str, dim: int):
     client.create_collection(collection_name=name, schema=schema, index_params=index_params)
 
 
+def _l2_normalize(v):
+    norm = sum(x * x for x in v) ** 0.5
+    if norm == 0:
+        return v
+    return [x / norm for x in v]
+
+
+def _openai_embed(base_url: str, api_key: str, model: str, inputs: List[str]):
+    url = base_url.rstrip("/") + "/embeddings"
+    payload = {"model": model, "input": inputs}
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        body = json.loads(resp.read().decode("utf-8"))
+    data = body.get("data", [])
+    vectors = [item.get("embedding", []) for item in data]
+    return [_l2_normalize(v) for v in vectors]
+
+
 def main():
     load_dotenv()
     parser = argparse.ArgumentParser()
@@ -61,7 +90,10 @@ def main():
 
     uri = os.getenv("MILVUS_URI", "http://127.0.0.1:19530")
     collection = os.getenv("MILVUS_COLLECTION", "openclaw_memory")
+    provider = os.getenv("EMBED_PROVIDER", "sentence-transformers")
     model_name = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+    embed_base_url = os.getenv("EMBED_BASE_URL", "http://127.0.0.1:11434/v1")
+    embed_api_key = os.getenv("EMBED_API_KEY", "ollama")
 
     main_ws = Path(os.getenv("MAIN_WORKSPACE", "~/.openclaw/workspace")).expanduser()
     coding_ws = Path(os.getenv("CODING_WORKSPACE", "~/.openclaw/workspace-coding")).expanduser()
@@ -72,8 +104,17 @@ def main():
         print(f"No files found for scope={args.scope}")
         return
 
-    model = SentenceTransformer(model_name)
-    dim = model.get_sentence_embedding_dimension()
+    st_model = None
+    if provider == "sentence-transformers":
+        st_model = SentenceTransformer(model_name)
+        dim = st_model.get_sentence_embedding_dimension()
+    elif provider == "openai":
+        probe = _openai_embed(embed_base_url, embed_api_key, model_name, ["probe"])
+        if not probe or not probe[0]:
+            raise RuntimeError("OpenAI-compatible embedding provider returned empty vector for probe")
+        dim = len(probe[0])
+    else:
+        raise ValueError(f"Unsupported EMBED_PROVIDER={provider}")
 
     client = MilvusClient(uri=uri)
     ensure_collection(client, collection, dim)
@@ -84,13 +125,18 @@ def main():
         chunks = chunk_text(text)
         if not chunks:
             continue
-        vectors = model.encode(chunks, normalize_embeddings=True)
+        if provider == "sentence-transformers":
+            vectors = st_model.encode(chunks, normalize_embeddings=True)
+            vectors = [v.tolist() for v in vectors]
+        else:
+            vectors = _openai_embed(embed_base_url, embed_api_key, model_name, chunks)
+
         for idx, (chunk, vec) in enumerate(zip(chunks, vectors)):
             rid = hashlib.sha1(f"{namespace}:{path}:{idx}:{chunk[:120]}".encode()).hexdigest()[:40]
             rows.append(
                 {
                     "id": rid,
-                    "vector": vec.tolist(),
+                    "vector": vec,
                     "namespace": namespace,
                     "path": str(path),
                     "text": chunk,
