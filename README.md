@@ -19,6 +19,11 @@ OpenClaw built-in memory is excellent for simple setups. This stack is better wh
 
 In short: built-in memory is simpler; this stack is more customizable for power users.
 
+Over multiple sessions and longer time windows, this stack helps by:
+- preserving high-signal memory with daily + weekly summarization loops
+- reducing context drift via repeatable retrieval pipelines per agent
+- keeping cross-session continuity explicit in versionable files + vector index
+
 ## 5-command quickstart (OpenClaw + local embeddings)
 
 ```bash
@@ -140,13 +145,14 @@ bash scripts/weekly_rollup.sh
 
 Recommended schedule:
 
-```cron
-# Daily at 02:00 UTC
-0 2 * * * /path/to/openclaw-memory-stack/scripts/daily_rollup.sh >> /tmp/openclaw_daily_rollup.log 2>&1
-
-# Weekly synthesis on Sunday at 03:00 UTC
-0 3 * * 0 /path/to/openclaw-memory-stack/scripts/weekly_rollup.sh >> /tmp/openclaw_weekly_rollup.log 2>&1
+```bash
+# configure cadence in .env, then install cron entries
+bash scripts/install_cron.sh
 ```
+
+Default cron cadence (UTC) is set in `.env`:
+- `ROLLUP_DAILY_CRON=0 2 * * *`
+- `ROLLUP_WEEKLY_CRON=0 3 * * 0`
 
 ## Embedding backends
 
