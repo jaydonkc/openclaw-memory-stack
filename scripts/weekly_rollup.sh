@@ -11,7 +11,7 @@ summarize_with_openclaw() {
   local agent_id="$1"
   local logs="$2"
   local prompt
-  prompt=$'Synthesize this week into exactly 3 durable, actionable facts.\nPrefer stable patterns over one-off noise and include one next-step when possible.\nFormat exactly as:\n- Fact 1\n- Fact 2\n- Fact 3\n\nLogs:\n'
+  prompt=$'Extract exactly 3 durable, actionable facts from these logs.\nFormat exactly as:\n- Fact 1\n- Fact 2\n- Fact 3\n\nLogs:\n'
   prompt+="$logs"
 
   local json
